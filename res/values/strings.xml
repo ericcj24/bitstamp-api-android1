@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">bitstamp chart</string>
+    <string name="swipe"></string>
+    <string name="menu_settings">Where am I</string>
+    <string name="menu_button1_transaction">Transactions</string>
+    <string name="menu_button2_order_book">Order Book</string>
+    <string name="menu_button3">Hello There</string>
+    <string name="plot1_title">Title</string>
+
+</resources>
