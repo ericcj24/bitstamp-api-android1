@@ -4,25 +4,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import android.app.AlarmManager;
 import android.app.IntentService;
-import android.app.PendingIntent;
-import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Parcelable;
-import android.provider.SyncStateContract.Constants;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.format.DateUtils;
-import android.text.format.Time;
 import android.util.Log;
 
 
@@ -75,7 +67,7 @@ public class TransactionUpdateService extends IntentService{
         switch (choice){
         	case 0:
         		int transactionCount = fetchTransactions();
-        		Log.i(TAG, "transaction count: " + Integer.toString(transactionCount));
+        		Log.i(TAG, "new transaction count: " + Integer.toString(transactionCount));
         		if(transactionCount>0){
         			/*
         			 * new transaction, database changed!
@@ -86,7 +78,7 @@ public class TransactionUpdateService extends IntentService{
         		    Intent localIntent =
         		            new Intent(TRANSACTION_RESULT)
         		            // Puts the status into the Intent
-        		            .putParcelableArrayListExtra(NAME, (ArrayList<? extends Parcelable>) newTransaction);
+        		            .putParcelableArrayListExtra(NAME, newTransaction);
         		    // Broadcasts the Intent to receivers in this app.
         		    broadcaster.sendBroadcast(localIntent);
         		}
@@ -143,7 +135,7 @@ public class TransactionUpdateService extends IntentService{
 		Log.i(TAG, "internet size: " + lt.size());
 	
 		// cursor check the newest entry so far prior to update		
-		String sortOrder = null;//KEY_TID + " DESC";
+		String sortOrder = KEY_TID + " DESC";
 		String[] projection = {KEY_TID};
 		String selection = null;
 		String[] selectionArgs = null;
@@ -158,33 +150,32 @@ public class TransactionUpdateService extends IntentService{
 		try{
 			// limit database size by deleting order rows
 			int size = c.getCount();
-			Log.i(TAG, "database size: " + lt.size());
+			Log.i(TAG, "database size: " + size);
 			
-			Log.i(TAG, "move to first: " + Boolean.toString(c.moveToFirst()));
-			Log.i(TAG, "cursor is null: " + Boolean.toString(c==null));
-			Log.i(TAG, "cursor toString: " + c.toString());
+			int databaseTid = 0;
+			if(size>0){
+				c.moveToFirst();
+				databaseTid = c.getInt(c.getColumnIndex(KEY_TID));
+				Log.i(TAG, "databaseTid first: " + databaseTid);
+				//c.moveToLast();
+				//int databaseTid1 = c.getInt(c.getColumnIndex(KEY_TID));
+				//Log.i(TAG, "databaseTid last: " + databaseTid1);
+			}
 			
-			if( c != null && c.moveToFirst() ){
-				int databaseTid = c.getInt(c.getColumnIndex(KEY_TID));
-				Log.i(TAG, "databaseTid: " + databaseTid);
+			for (Transaction temp : lt){
+				// if the transaction is new, insert it into the provider
+				//Log.i(TAG, "tempTid: " + temp.getTid());
 				
-				for (Transaction temp : lt){
-					// if the transaction is new, insert it into the provider
-					Log.i(TAG, "tempTid: " + temp.getTid());
-					
-					if(temp.getTid() > databaseTid){
-						ContentValues values = new ContentValues();
-						values.put(KEY_TID, temp.getTid());
-						values.put(KEY_DATE, temp.getDate());
-						values.put(KEY_PRICE, temp.getPrice());
-						values.put(KEY_AMOUNT, temp.getAmount());
-					
-						db.insert(TRANSACTION_TABLE_NAME, null, values);
-						count++;
-					}
+				if(temp.getTid() > databaseTid){
+					ContentValues values = new ContentValues();
+					values.put(KEY_TID, temp.getTid());
+					values.put(KEY_DATE, temp.getDate());
+					values.put(KEY_PRICE, temp.getPrice());
+					values.put(KEY_AMOUNT, temp.getAmount());
+					db.insert(TRANSACTION_TABLE_NAME, null, values);
+					count++;
 				}
-			} // end of if
-					
+			}			
 		}finally{
 			c.close();
 		}

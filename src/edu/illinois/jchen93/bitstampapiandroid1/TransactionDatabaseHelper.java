@@ -1,8 +1,6 @@
 package edu.illinois.jchen93.bitstampapiandroid1;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -24,7 +22,7 @@ public class TransactionDatabaseHelper extends SQLiteOpenHelper{
 		    "DROP TABLE IF EXISTS " + TRANSACTION_TABLE_NAME;
 	private static final String DATABASE_CREATE = 
 			"CREATE TABLE " + TRANSACTION_TABLE_NAME + " ("
-			+ KEY_ID + " INTEGER PRIMARY KEY,"
+			+ KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
 			+ KEY_TID + " LONG, "
 			+ KEY_DATE + " STRING, "
 			+ KEY_PRICE + " STRING, "

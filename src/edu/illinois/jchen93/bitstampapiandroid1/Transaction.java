@@ -39,6 +39,13 @@ public class Transaction implements Parcelable{
     public String getAmount(){
     	return amount;
     }
+    
+    // implementing parcelable
+    private Transaction(Parcel in) {
+        super(); 
+        readFromParcel(in);
+    }
+    
 	@Override
 	public int describeContents() {
 		// TODO Auto-generated method stub
@@ -65,14 +72,8 @@ public class Transaction implements Parcelable{
         }
 
         public Transaction[] newArray(int size) {
-
             return new Transaction[size];
         }
     };
-    
-    public Transaction(Parcel in) {
-        super(); 
-        readFromParcel(in);
-    }
 	
 }
