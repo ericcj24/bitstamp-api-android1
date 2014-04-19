@@ -45,7 +45,7 @@ public class TransactionUpdateService extends IntentService{
 	static final String NAME = "edu.illinois.jchen93.bitstampapiandroid1.TransactionUpdateService";
 	static final public String TRANSACTION_RESULT = "edu.illinois.jchen93.bitstampapiandroid1.TransactionUpdateService.PROCESSED";
 	
-	private LocalBroadcastManager broadcaster;
+	private LocalBroadcastManager localBroadcaster = LocalBroadcastManager.getInstance(this);
 	/**
 	   * A constructor is required, and must call the super IntentService(String)
 	   * constructor with a name for the worker thread.
@@ -57,8 +57,6 @@ public class TransactionUpdateService extends IntentService{
 	
 	@Override
     protected void onHandleIntent(Intent workIntent) {
-		broadcaster = LocalBroadcastManager.getInstance(this);
-		
 		
 		// Gets data from the incoming Intent
         String dataString = workIntent.getDataString();
@@ -75,12 +73,14 @@ public class TransactionUpdateService extends IntentService{
         		     * BROADCAST_ACTION is a custom Intent action
         		     */
         			ArrayList<Transaction> newTransaction = fetchTransactionFromDatabase();
+        			Log.i(TAG, "new fetched size from database "+Integer.toString(newTransaction.size()));
+        			
         		    Intent localIntent =
         		            new Intent(TRANSACTION_RESULT)
         		            // Puts the status into the Intent
-        		            .putParcelableArrayListExtra(NAME, newTransaction);
+        		            .putParcelableArrayListExtra(TRANSACTION_RESULT, newTransaction);
         		    // Broadcasts the Intent to receivers in this app.
-        		    broadcaster.sendBroadcast(localIntent);
+        		    localBroadcaster.sendBroadcast(localIntent);
         		}
         		break;
         	case 1:
@@ -210,7 +210,6 @@ public class TransactionUpdateService extends IntentService{
 													c.getInt(c.getColumnIndex(KEY_TID)),
 													c.getString(c.getColumnIndex(KEY_PRICE)),
 													c.getString(c.getColumnIndex(KEY_AMOUNT)));
-				
 				rt.add(temp);
 				c.moveToNext();
 			}

@@ -86,7 +86,11 @@ public class MainActivity extends Activity {
 	        public void onReceive(Context context, Intent intent) {
 	            ArrayList<Transaction> s = intent.getParcelableArrayListExtra(TransactionUpdateService.TRANSACTION_RESULT);
 	            // do something here.
-	            plotTransaction(s);
+	            
+	            if (s==null){ Log.i(TAG, "broadvast received null, failed broadcast");}
+	            else{
+	            	Log.i(TAG, "broadcast receive correctly, arraylist size is: "+Integer.toString(s.size()));
+	            	plotTransaction(s);}
 	        }
 	    };
 	}
@@ -108,7 +112,7 @@ public class MainActivity extends Activity {
 				case R.id.btn1:
 					intent = new Intent(MainActivity.this, TransactionUpdateService.class);
 					intent.setData(Uri.parse("0"));
-					PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 0, intent, 0);
+					PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 101, intent, 0);
 					alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 				    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, 2500, pendingIntent);
 					break;
@@ -126,7 +130,7 @@ public class MainActivity extends Activity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         
         intent = new Intent(MainActivity.this, TransactionUpdateService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 101, intent, 0);
         alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         alarmMgr.cancel(pendingIntent);
         Log.i(TAG, "on stop");
@@ -139,15 +143,15 @@ public class MainActivity extends Activity {
 		plot1 = (XYPlot) findViewById(R.id.plot1);
 		plot1.clear();
 		
-		
 		int n = transactionArray.size();
-		Log.i(TAG, "size is: "+n);
+		Log.i(TAG, "transaction size is: "+n);
 		Number[] time = new Number[n];
 		Number[] y = new Number[n];
 		int i = 0;
 		for(Transaction temp : transactionArray){
 			time[i] = Long.parseLong(temp.getDate());
 			y[i] = Double.parseDouble(temp.getPrice());
+			//Log.i(TAG, "time is: "+time[i]);
 		}
 
 		XYSeries series = new SimpleXYSeries(Arrays.asList(time),Arrays.asList(y),"Transactions");
@@ -202,7 +206,6 @@ public class MainActivity extends Activity {
 
             }
         });
-        
        
         plot1.redraw();
         plot1.setVisibility(1);
