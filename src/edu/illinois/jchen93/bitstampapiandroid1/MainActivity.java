@@ -44,6 +44,9 @@ public class MainActivity extends Activity {
 	private BroadcastReceiver receiver; 
 	Intent intent;
 
+	private String CHOICE;
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -110,18 +113,20 @@ public class MainActivity extends Activity {
     		Button btn=(Button)v;
     		switch (btn.getId()){
 				case R.id.btn1:
-					
+					// check isequal to same
+					// check isequal to the other
+					// check if empty
 					// add checking for repeating press the same button!!!!!!!!!!!!!!!!!!
-					
+					CHOICE = "0";
 					intent = new Intent(MainActivity.this, TransactionUpdateService.class);
-					intent.setData(Uri.parse("0"));
+					intent.setData(Uri.parse(CHOICE));
 					PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 101, intent, 0);
 					alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 				    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME, 0, 2500, pendingIntent);
 					break;
     			
 	    		case R.id.btn2:
-	
+	    			CHOICE = "0";
 	    			break;
     		}
     	}
@@ -133,7 +138,7 @@ public class MainActivity extends Activity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         
         intent = new Intent(MainActivity.this, TransactionUpdateService.class);
-        intent.setData(Uri.parse("0"));
+        intent.setData(Uri.parse(CHOICE));
         PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 101, intent, 0);
         alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         alarmMgr.cancel(pendingIntent);
@@ -155,7 +160,7 @@ public class MainActivity extends Activity {
 		for(Transaction temp : transactionArray){
 			time[i] = Long.parseLong(temp.getDate());
 			y[i] = Double.parseDouble(temp.getPrice());
-			//Log.i(TAG, "time is: "+time[i]);
+			i++;
 		}
 
 		XYSeries series = new SimpleXYSeries(Arrays.asList(time),Arrays.asList(y),"Transactions");
