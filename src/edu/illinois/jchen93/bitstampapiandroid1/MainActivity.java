@@ -110,11 +110,14 @@ public class MainActivity extends Activity {
     		Button btn=(Button)v;
     		switch (btn.getId()){
 				case R.id.btn1:
+					
+					// add checking for repeating press the same button!!!!!!!!!!!!!!!!!!
+					
 					intent = new Intent(MainActivity.this, TransactionUpdateService.class);
 					intent.setData(Uri.parse("0"));
 					PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 101, intent, 0);
 					alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-				    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, 2500, pendingIntent);
+				    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME, 0, 2500, pendingIntent);
 					break;
     			
 	    		case R.id.btn2:
@@ -130,6 +133,7 @@ public class MainActivity extends Activity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         
         intent = new Intent(MainActivity.this, TransactionUpdateService.class);
+        intent.setData(Uri.parse("0"));
         PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 101, intent, 0);
         alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         alarmMgr.cancel(pendingIntent);
@@ -144,7 +148,7 @@ public class MainActivity extends Activity {
 		plot1.clear();
 		
 		int n = transactionArray.size();
-		Log.i(TAG, "transaction size is: "+n);
+		Log.i(TAG, "ploting transaction size is: "+n);
 		Number[] time = new Number[n];
 		Number[] y = new Number[n];
 		int i = 0;
@@ -168,8 +172,8 @@ public class MainActivity extends Activity {
 
         // Create a formatter to use for drawing a series using LineAndPointRenderer:
         LineAndPointFormatter format = new LineAndPointFormatter(
-                Color.RED,                   // line color
-                Color.rgb(0, 100, 0),                   // point color
+                Color.RED,                  // line color
+                Color.rgb(0, 100, 0),       // point color
                 null, null);                // fill color
         
         plot1.getGraphWidget().setPaddingRight(2);
@@ -177,11 +181,11 @@ public class MainActivity extends Activity {
 
         // draw a domain tick for each time:
         //plot1.setDomainStep(XYStepMode.SUBDIVIDE, time.length/400);
-        plot1.setDomainStepValue(10);
+        plot1.setDomainStepValue(9);
 
         // customize our domain/range labels
         plot1.setDomainLabel("Time");
-        plot1.setRangeLabel("Value");
+        plot1.setRangeLabel("Price");
 
         plot1.setDomainValueFormat(new Format() {
 

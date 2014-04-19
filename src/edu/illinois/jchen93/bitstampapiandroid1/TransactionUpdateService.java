@@ -156,7 +156,7 @@ public class TransactionUpdateService extends IntentService{
 			if(size>0){
 				c.moveToFirst();
 				databaseTid = c.getInt(c.getColumnIndex(KEY_TID));
-				Log.i(TAG, "databaseTid first: " + databaseTid);
+				//Log.i(TAG, "databaseTid first: " + databaseTid);
 				//c.moveToLast();
 				//int databaseTid1 = c.getInt(c.getColumnIndex(KEY_TID));
 				//Log.i(TAG, "databaseTid last: " + databaseTid1);
