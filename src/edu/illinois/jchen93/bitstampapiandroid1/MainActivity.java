@@ -9,6 +9,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
 
+import com.androidplot.ui.AnchorPosition;
+import com.androidplot.ui.SizeLayoutType;
+import com.androidplot.ui.SizeMetrics;
+import com.androidplot.ui.XLayoutStyle;
+import com.androidplot.ui.YLayoutStyle;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYPlot;
@@ -186,18 +191,19 @@ public class MainActivity extends Activity {
 
         // draw a domain tick for each time:
         //plot1.setDomainStep(XYStepMode.SUBDIVIDE, time.length/400);
-        plot1.setDomainStepValue(9);
+        plot1.setDomainStepValue(10);
+        plot1.setRangeStepValue(9);
 
         // customize our domain/range labels
         plot1.setDomainLabel("Time");
-        plot1.setRangeLabel("Price");
-
+        plot1.setRangeLabel("Price");      
+        
         plot1.setDomainValueFormat(new Format() {
 
             // create a simple date format that draws on the year portion of our timestamp.
             // see http://download.oracle.com/javase/1.4.2/docs/api/java/text/SimpleDateFormat.html
             // for a full description of SimpleDateFormat.
-            private SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
             @Override
             public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
@@ -216,6 +222,15 @@ public class MainActivity extends Activity {
             }
         });
        
+        plot1.getGraphWidget().getDomainLabelPaint().setTextSize(15);
+        plot1.getGraphWidget().getRangeLabelPaint().setTextSize(15);
+        //plot1.getGraphWidget().setDomainLabelOrientation(-20);
+        //plot1.getGraphWidget().setRangeLabelOrientation(20);
+        plot1.getGraphWidget().setPaddingRight(25);
+        plot1.getGraphWidget().setPaddingTop(6);
+        
+        plot1.getGraphWidget().setSize(new SizeMetrics(70, SizeLayoutType.FILL, 50, SizeLayoutType.FILL));
+
         plot1.redraw();
         plot1.setVisibility(1);
         plot1.bringToFront();

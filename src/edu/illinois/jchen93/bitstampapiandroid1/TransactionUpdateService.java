@@ -44,6 +44,7 @@ public class TransactionUpdateService extends IntentService{
 	static final String TRANSACTION_TABLE_NAME = "transactions";
 	static final String NAME = "edu.illinois.jchen93.bitstampapiandroid1.TransactionUpdateService";
 	static final public String TRANSACTION_RESULT = "edu.illinois.jchen93.bitstampapiandroid1.TransactionUpdateService.PROCESSED";
+	static boolean isFirst = true;
 	
 	private LocalBroadcastManager localBroadcaster = LocalBroadcastManager.getInstance(this);
 	/**
@@ -66,14 +67,15 @@ public class TransactionUpdateService extends IntentService{
         	case 0:
         		int transactionCount = fetchTransactions();
         		Log.i(TAG, "new transaction count: " + Integer.toString(transactionCount));
-        		if(transactionCount>0){
+        		if(transactionCount>0 || isFirst){
+        			isFirst = false;
         			/*
         			 * new transaction, database changed!
         		     * Creates a new Intent containing a Uri object
         		     * BROADCAST_ACTION is a custom Intent action
         		     */
         			ArrayList<Transaction> newTransaction = fetchTransactionFromDatabase();
-        			Log.i(TAG, "new fetched size from database "+Integer.toString(newTransaction.size()));
+        			Log.i(TAG, "fetched size from database "+Integer.toString(newTransaction.size()));
         			
         		    Intent localIntent =
         		            new Intent(TRANSACTION_RESULT)
@@ -185,8 +187,12 @@ public class TransactionUpdateService extends IntentService{
 		SQLiteDatabase db = tDbHelper.getWritableDatabase();
 		
 		String sortOrder = KEY_TID + " DESC";
+		
+		
 		// Define a projection that specifies which columns from the database
 		// you will actually use after this query.
+		
+		
 		String[] projection = {KEY_TID, KEY_DATE, KEY_PRICE, KEY_AMOUNT};
 		String selection = null;
 		String[] selectionArgs = null;
