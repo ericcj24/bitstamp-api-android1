@@ -46,8 +46,9 @@ public class MainActivity extends Activity {
 	private XYPlot plot1;
 	
 	private AlarmManager alarmMgr;
-	private BroadcastReceiver receiver0;
-	private BroadcastReceiver receiver1;
+	//private BroadcastReceiver receiver0;
+	//private BroadcastReceiver receiver1;
+	private BroadcastReceiver receiver;
 	Intent intent;
 	PendingIntent pendingIntent;
 
@@ -95,25 +96,24 @@ public class MainActivity extends Activity {
 		});
 		
 		
-		receiver0 = new BroadcastReceiver() {
+		receiver = new BroadcastReceiver() {
 	        @Override
 	        public void onReceive(Context context, Intent intent) {
-	        	String intentAction = intent.getAction();
-	        	Log.i(TAG, "this is "+intentAction);
-	        	if(intentAction == TransactionUpdateService.TRANSACTION_RESULT){
-	        	
+	        	//String intentServiceType = intent.getData().toString();
+	        	//Log.i(TAG, "this is "+intentServiceType);
+
 	        		ArrayList<Transaction> s = intent.getParcelableArrayListExtra(TransactionUpdateService.TRANSACTION_RESULT);
 	            
 	        		if (s==null){ Log.i(TAG, "broadcast received null, failed broadcast");}
 	        		else{
-	        			Log.i(TAG, "broadcast receive correctly, arraylist size is: "+Integer.toString(s.size()));
+	        			Log.i(TAG, "transaction broadcast receive correctly, arraylist size is: "+Integer.toString(s.size()));
 	        			plotTransaction(s);
 	        		}
-	        	}  	
+	        	
 	        }
 	    };
 	    
-	    receiver1 = new BroadcastReceiver(){
+	    /*receiver1 = new BroadcastReceiver(){
 	    	@Override
 	    	public void onReceive(Context context, Intent intent){
 	    		String intentAction = intent.getAction();
@@ -128,7 +128,7 @@ public class MainActivity extends Activity {
 	        		}
 	        	}
 	    	}
-	    };
+	    };*/
 	}
 	
 	@Override
@@ -137,9 +137,10 @@ public class MainActivity extends Activity {
 		TextView temp = (TextView)findViewById(R.id.textView);
 		temp.setText("make you choice :)");
 		
-		LocalBroadcastManager.getInstance(this).registerReceiver((receiver0), new IntentFilter(TransactionUpdateService.TRANSACTION_RESULT));
-		LocalBroadcastManager.getInstance(this).registerReceiver((receiver1), new IntentFilter(OrderBookUpdateService.ORDERBOOK_RESULT));
-	
+		//LocalBroadcastManager.getInstance(this).registerReceiver((receiver0), new IntentFilter(TransactionUpdateService.TRANSACTION_RESULT));
+		//LocalBroadcastManager.getInstance(this).registerReceiver((receiver1), new IntentFilter(OrderBookUpdateService.ORDERBOOK_RESULT));
+		LocalBroadcastManager.getInstance(this).registerReceiver((receiver), new IntentFilter(TransactionUpdateService.TRANSACTION_RESULT));
+		
 		Log.i(TAG, "on start");
 	}
 	
@@ -151,7 +152,8 @@ public class MainActivity extends Activity {
 				case R.id.btn1:
 					if(Integer.parseInt(CHOICE) == 1){
 						//cancel trade book
-						Log.i(TAG, "cancelling alarm " + CHOICE);
+						Log.i(TAG, "cancel alarm " + CHOICE);
+						//pendingIntent.cancel();					
 						pendingIntent = PendingIntent.getService(MainActivity.this, REQUEST_CODE, intent, 0);
 				        alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 				        alarmMgr.cancel(pendingIntent);			        
@@ -173,6 +175,7 @@ public class MainActivity extends Activity {
 	    			if(Integer.parseInt(CHOICE) == 0){
 						//cancel transaction
 	    				Log.i(TAG, "cancel alarm "+ CHOICE);
+	    				//pendingIntent.cancel();
 	    				pendingIntent = PendingIntent.getService(MainActivity.this, REQUEST_CODE, intent, 0);
 				        alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 				        alarmMgr.cancel(pendingIntent);
@@ -198,19 +201,23 @@ public class MainActivity extends Activity {
     		}
     	}
     };
+    
 
     @Override
     protected void onStop() {
     	super.onStop();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver0);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver1);
-        
-        Log.i(TAG, "on stop, cancel alarm "+ CHOICE);
+        //LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver0);
+        //LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver1);
+    	LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+    	
+        if (alarmMgr != null)
+        {Log.i(TAG, "on stop, cancel alarm "+ CHOICE);
         //intent = new Intent(MainActivity.this, TransactionUpdateService.class);
         //intent.setData(Uri.parse(CHOICE));
+        //pendingIntent.cancel();
         pendingIntent = PendingIntent.getService(MainActivity.this, REQUEST_CODE, intent, 0);
         alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        alarmMgr.cancel(pendingIntent);
+        alarmMgr.cancel(pendingIntent);}
     }
 	
 	private void plotTransaction(ArrayList<Transaction> transactionArray){

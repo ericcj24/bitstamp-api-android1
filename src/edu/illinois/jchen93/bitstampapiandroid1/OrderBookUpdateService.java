@@ -14,6 +14,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Parcelable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -75,8 +76,9 @@ public class OrderBookUpdateService extends IntentService{
         		            new Intent(ORDERBOOK_RESULT)
         		            // Puts the status into the Intent
         		            .putParcelableArrayListExtra(ORDERBOOK_RESULT, newOrderBookList);
+        		    localIntent.setData(Uri.parse("orderbook"));
         		    // Broadcasts the Intent to receivers in main UI thread.
-        		    localBroadcaster.sendBroadcast(localIntent);
+        		    //localBroadcaster.sendBroadcast(localIntent);
         		//}
         		break;
         	default:
@@ -104,13 +106,13 @@ public class OrderBookUpdateService extends IntentService{
 	                int askSize = 0;
 					int bidSize = 0;
 	                for(ArrayList<String> temp : ob.getAsks()){
-	                	if(Double.parseDouble(temp.get(0)) > 200 &&  Double.parseDouble(temp.get(0))< 850 && Double.parseDouble(temp.get(1)) < 3){
+	                	if(Double.parseDouble(temp.get(0)) > 200 &&  Double.parseDouble(temp.get(0))< 850 && Double.parseDouble(temp.get(1)) < 5){
 	                		Price_Amount newAsk = new Price_Amount(temp.get(0), temp.get(1));
 	                		rt.add(newAsk);
 	                		askSize++;}
 	                }
 	                for(ArrayList<String> temp : ob.getBids()){
-	                	if(Double.parseDouble(temp.get(0)) > 200 &&  Double.parseDouble(temp.get(0))< 850 && Double.parseDouble(temp.get(1)) < 3){
+	                	if(Double.parseDouble(temp.get(0)) > 200 &&  Double.parseDouble(temp.get(0))< 850 && Double.parseDouble(temp.get(1)) < 5){
 	                		Price_Amount newBid = new Price_Amount(temp.get(0), temp.get(1));
 	                		rt.add(newBid);
 	                		bidSize++;}
