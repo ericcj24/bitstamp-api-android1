@@ -27,6 +27,9 @@
         <service
             android:name=".TransactionUpdateService"
             android:exported="false"/>
+        <service
+            android:name=".OrderBookUpdateService"
+            android:exported="false"/>
         
     </application>
 

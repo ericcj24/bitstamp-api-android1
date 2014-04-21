@@ -48,21 +48,26 @@ public class MainActivity extends Activity {
 	private AlarmManager alarmMgr;
 	private BroadcastReceiver receiver; 
 	Intent intent;
+	PendingIntent pendingIntent;
 
-	private String CHOICE;
+	private String CHOICE = "2";
+	private int REQUEST_CODE = 0;
 	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		setContentView(R.layout.activity_main);
+		//setContentView(R.layout.activity_main);
 		Button mainMenuButton1 = null;
     	Button mainMenuButton2 = null;
+    	Button mainMenuButton3 = null;
     	mainMenuButton1=(Button)findViewById(R.id.btn1);
         mainMenuButton2=(Button)findViewById(R.id.btn2);
+        mainMenuButton3=(Button)findViewById(R.id.btn3);
         mainMenuButton1.setOnClickListener(listener);
         mainMenuButton2.setOnClickListener(listener);
+        mainMenuButton3.setOnClickListener(listener);
         
 		
 		mSlideHolder = (SlideHolder) findViewById(R.id.slideHolder);
@@ -92,13 +97,28 @@ public class MainActivity extends Activity {
 		receiver = new BroadcastReceiver() {
 	        @Override
 	        public void onReceive(Context context, Intent intent) {
-	            ArrayList<Transaction> s = intent.getParcelableArrayListExtra(TransactionUpdateService.TRANSACTION_RESULT);
-	            // do something here.
+	        	String intentAction = intent.getAction();
+	        	if(intentAction == TransactionUpdateService.TRANSACTION_RESULT){
+	        	
+	        		ArrayList<Transaction> s = intent.getParcelableArrayListExtra(TransactionUpdateService.TRANSACTION_RESULT);
 	            
-	            if (s==null){ Log.i(TAG, "broadvast received null, failed broadcast");}
-	            else{
-	            	Log.i(TAG, "broadcast receive correctly, arraylist size is: "+Integer.toString(s.size()));
-	            	plotTransaction(s);}
+	        		if (s==null){ Log.i(TAG, "broadcast received null, failed broadcast");}
+	        		else{
+	        			Log.i(TAG, "broadcast receive correctly, arraylist size is: "+Integer.toString(s.size()));
+	        			plotTransaction(s);
+	        		}
+	        	}
+	        	
+	        	if(intentAction == OrderBookUpdateService.ORDERBOOK_RESULT){
+		        	
+	        		ArrayList<Price_Amount> s = intent.getParcelableArrayListExtra(OrderBookUpdateService.ORDERBOOK_RESULT);
+	            
+	        		if (s==null){ Log.i(TAG, "broadcast received null, failed broadcast");}
+	        		else{
+	        			Log.i(TAG, "orderbook broadcast receive correctly, arraylist size is: "+Integer.toString(s.size()));
+	        			plotOrderBook(s);
+	        		}
+	        	}
 	        }
 	    };
 	}
@@ -110,6 +130,8 @@ public class MainActivity extends Activity {
 		temp.setText("make you choice :)");
 		
 		LocalBroadcastManager.getInstance(this).registerReceiver((receiver), new IntentFilter(TransactionUpdateService.TRANSACTION_RESULT));
+	
+		Log.i(TAG, "on start");
 	}
 	
 	private OnClickListener listener = new OnClickListener()
@@ -118,20 +140,50 @@ public class MainActivity extends Activity {
     		Button btn=(Button)v;
     		switch (btn.getId()){
 				case R.id.btn1:
+					if(Integer.parseInt(CHOICE) == 1){
+						//cancel trade book
+						Log.i(TAG, "cancelling alarm " + CHOICE);
+						pendingIntent = PendingIntent.getService(MainActivity.this, REQUEST_CODE, intent, 0);
+				        alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+				        alarmMgr.cancel(pendingIntent);			        
+					}
 					// check isequal to same
 					// check isequal to the other
 					// check if empty
-					// add checking for repeating press the same button!!!!!!!!!!!!!!!!!!
+					// add checking for repeating press the same button!!!!!!!!!!!!!
 					CHOICE = "0";
 					intent = new Intent(MainActivity.this, TransactionUpdateService.class);
 					intent.setData(Uri.parse(CHOICE));
-					PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 101, intent, 0);
+					REQUEST_CODE = 101;
+					pendingIntent = PendingIntent.getService(MainActivity.this, REQUEST_CODE, intent, 0);
 					alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 				    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME, 0, 2500, pendingIntent);
 					break;
     			
 	    		case R.id.btn2:
-	    			CHOICE = "0";
+	    			if(Integer.parseInt(CHOICE) == 0){
+						//cancel transaction
+	    				Log.i(TAG, "cancel alarm "+ CHOICE);
+	    				pendingIntent = PendingIntent.getService(MainActivity.this, REQUEST_CODE, intent, 0);
+				        alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+				        alarmMgr.cancel(pendingIntent);
+					}
+	    			CHOICE = "1";
+	    			intent = new Intent(MainActivity.this, OrderBookUpdateService.class);
+					intent.setData(Uri.parse(CHOICE));
+					REQUEST_CODE = 102;
+					pendingIntent = PendingIntent.getService(MainActivity.this, REQUEST_CODE, intent, 0);
+					alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+				    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME, 0, 2500, pendingIntent);
+	    			break;
+	    			
+	    		case R.id.btn3:
+	    			if(Integer.parseInt(CHOICE) != 2){
+	    				Log.i(TAG, "pressed cancel, cancel alarm "+ CHOICE);
+	    				pendingIntent = PendingIntent.getService(MainActivity.this, REQUEST_CODE, intent, 0);
+				        alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+				        alarmMgr.cancel(pendingIntent);
+	    			}
 	    			break;
     		}
     	}
@@ -142,12 +194,12 @@ public class MainActivity extends Activity {
     	super.onStop();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         
-        intent = new Intent(MainActivity.this, TransactionUpdateService.class);
-        intent.setData(Uri.parse(CHOICE));
-        PendingIntent pendingIntent = PendingIntent.getService(MainActivity.this, 101, intent, 0);
+        Log.i(TAG, "on stop, cancelling alarm "+ CHOICE);
+        //intent = new Intent(MainActivity.this, TransactionUpdateService.class);
+        //intent.setData(Uri.parse(CHOICE));
+        pendingIntent = PendingIntent.getService(MainActivity.this, REQUEST_CODE, intent, 0);
         alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         alarmMgr.cancel(pendingIntent);
-        Log.i(TAG, "on stop");
     }
 	
 	private void plotTransaction(ArrayList<Transaction> transactionArray){
@@ -237,29 +289,32 @@ public class MainActivity extends Activity {
 	}
 
 	
-	private void plotTradeBook(Vector<Vector<Double>> vec){
+	private void plotOrderBook(ArrayList<Price_Amount> ob){
 		TextView temp = (TextView)findViewById(R.id.textView);
 		//temp.setText("");
 		temp.setVisibility(0);
 		plot1 = (XYPlot)findViewById(R.id.plot1);
 		plot1.clear();
 		
-		int nbid = vec.get(0).size();
-		int nask = vec.get(2).size();
-		Number[] x1 = new Number[nbid];
-		Number[] y1 = new Number[nbid];
-		for(int i=0; i<nbid; i++){
-			x1[i] = vec.get(0).get(i);
-			y1[i] = vec.get(1).get(i);
+		int size = ob.size();
+		int nask = Integer.parseInt(ob.get(size-1).getPrice());
+		int nbid = Integer.parseInt(ob.get(size-1).getAmount());
+		Number[] x1 = new Number[nask];
+		Number[] y1 = new Number[nask];
+		int i=0;
+		for(i=0; i<nask; i++){
+			x1[i] = Double.parseDouble(ob.get(i).getPrice());
+			y1[i] = Double.parseDouble(ob.get(i).getAmount());
 		}
-		Number[] x2 = new Number[nask];
-		Number[] y2 = new Number[nask];
-		for(int i=0; i<nask; i++){
-			x2[i] = vec.get(2).get(i);
-			y2[i] = vec.get(3).get(i);
+		Log.i(TAG, "nask is "+nbid +"and i is "+i);
+		Number[] x2 = new Number[nbid];
+		Number[] y2 = new Number[nbid];
+		for(int j=0; j<nbid; j++){
+			x2[j] = Double.parseDouble(ob.get(i+j).getPrice());
+			y2[j] = Double.parseDouble(ob.get(i+j).getAmount());
 		}
-		XYSeries series1 = new SimpleXYSeries(Arrays.asList(x1),Arrays.asList(y1),"Bids");
-		XYSeries series2 = new SimpleXYSeries(Arrays.asList(x2),Arrays.asList(y2),"Asks");
+		XYSeries series1 = new SimpleXYSeries(Arrays.asList(x1),Arrays.asList(y1),"Asks");
+		XYSeries series2 = new SimpleXYSeries(Arrays.asList(x2),Arrays.asList(y2),"Bids");
 		
 		plot1.getGraphWidget().getGridBackgroundPaint().setColor(Color.BLACK);
         plot1.getGraphWidget().getDomainGridLinePaint().setColor(Color.WHITE);

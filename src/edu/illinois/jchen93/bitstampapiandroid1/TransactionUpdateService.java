@@ -18,20 +18,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 
-/*
- * 
- * Creates a new Intent to start the RSSPullService
- * IntentService. Passes a URI in the
- * Intent's "data" field.
- *
-mServiceIntent = new Intent(getActivity(), RSSPullService.class);
-mServiceIntent.setData(Uri.parse(dataUrl));
-
-Starts the IntentService
-getActivity().startService(mServiceIntent);
- */
-
-
 public class TransactionUpdateService extends IntentService{
 	static final String TAG = "TransactionUpdateService";
 	
@@ -86,7 +72,7 @@ public class TransactionUpdateService extends IntentService{
         		}
         		break;
         	case 1:
-        		int tradeBookCount = fetchTradeBook();
+        		
         		break;
         	default:
         		break;
@@ -186,16 +172,13 @@ public class TransactionUpdateService extends IntentService{
 		TransactionDatabaseHelper tDbHelper = TransactionDatabaseHelper.getInstance(this);
 		SQLiteDatabase db = tDbHelper.getWritableDatabase();
 		
-		String sortOrder = KEY_TID + " DESC";
-		
-		
 		// Define a projection that specifies which columns from the database
-		// you will actually use after this query.
-		
+		// you will actually use after this query.	
 		
 		String[] projection = {KEY_TID, KEY_DATE, KEY_PRICE, KEY_AMOUNT};
 		String selection = null;
 		String[] selectionArgs = null;
+		String sortOrder = KEY_TID + " DESC";
 		Cursor c = db.query(TRANSACTION_TABLE_NAME,
 							projection,                               // The columns to return
 							selection,                                // The columns for the WHERE clause
