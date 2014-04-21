@@ -46,7 +46,8 @@ public class MainActivity extends Activity {
 	private XYPlot plot1;
 	
 	private AlarmManager alarmMgr;
-	private BroadcastReceiver receiver; 
+	private BroadcastReceiver receiver0;
+	private BroadcastReceiver receiver1;
 	Intent intent;
 	PendingIntent pendingIntent;
 
@@ -94,10 +95,11 @@ public class MainActivity extends Activity {
 		});
 		
 		
-		receiver = new BroadcastReceiver() {
+		receiver0 = new BroadcastReceiver() {
 	        @Override
 	        public void onReceive(Context context, Intent intent) {
 	        	String intentAction = intent.getAction();
+	        	Log.i(TAG, "this is "+intentAction);
 	        	if(intentAction == TransactionUpdateService.TRANSACTION_RESULT){
 	        	
 	        		ArrayList<Transaction> s = intent.getParcelableArrayListExtra(TransactionUpdateService.TRANSACTION_RESULT);
@@ -107,19 +109,25 @@ public class MainActivity extends Activity {
 	        			Log.i(TAG, "broadcast receive correctly, arraylist size is: "+Integer.toString(s.size()));
 	        			plotTransaction(s);
 	        		}
-	        	}
-	        	
-	        	if(intentAction == OrderBookUpdateService.ORDERBOOK_RESULT){
-		        	
-	        		ArrayList<Price_Amount> s = intent.getParcelableArrayListExtra(OrderBookUpdateService.ORDERBOOK_RESULT);
-	            
+	        	}  	
+	        }
+	    };
+	    
+	    receiver1 = new BroadcastReceiver(){
+	    	@Override
+	    	public void onReceive(Context context, Intent intent){
+	    		String intentAction = intent.getAction();
+	        	Log.i(TAG, "this is "+intentAction);
+	    		if(intentAction == OrderBookUpdateService.ORDERBOOK_RESULT){
+		  
+	        		ArrayList<Price_Amount> s = intent.getParcelableArrayListExtra(OrderBookUpdateService.ORDERBOOK_RESULT);   
 	        		if (s==null){ Log.i(TAG, "broadcast received null, failed broadcast");}
 	        		else{
 	        			Log.i(TAG, "orderbook broadcast receive correctly, arraylist size is: "+Integer.toString(s.size()));
 	        			plotOrderBook(s);
 	        		}
 	        	}
-	        }
+	    	}
 	    };
 	}
 	
@@ -129,7 +137,8 @@ public class MainActivity extends Activity {
 		TextView temp = (TextView)findViewById(R.id.textView);
 		temp.setText("make you choice :)");
 		
-		LocalBroadcastManager.getInstance(this).registerReceiver((receiver), new IntentFilter(TransactionUpdateService.TRANSACTION_RESULT));
+		LocalBroadcastManager.getInstance(this).registerReceiver((receiver0), new IntentFilter(TransactionUpdateService.TRANSACTION_RESULT));
+		LocalBroadcastManager.getInstance(this).registerReceiver((receiver1), new IntentFilter(OrderBookUpdateService.ORDERBOOK_RESULT));
 	
 		Log.i(TAG, "on start");
 	}
@@ -174,7 +183,7 @@ public class MainActivity extends Activity {
 					REQUEST_CODE = 102;
 					pendingIntent = PendingIntent.getService(MainActivity.this, REQUEST_CODE, intent, 0);
 					alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-				    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME, 0, 2500, pendingIntent);
+				    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME, 0, 7000, pendingIntent);
 	    			break;
 	    			
 	    		case R.id.btn3:
@@ -183,6 +192,7 @@ public class MainActivity extends Activity {
 	    				pendingIntent = PendingIntent.getService(MainActivity.this, REQUEST_CODE, intent, 0);
 				        alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 				        alarmMgr.cancel(pendingIntent);
+				        CHOICE = "2";
 	    			}
 	    			break;
     		}
@@ -192,9 +202,10 @@ public class MainActivity extends Activity {
     @Override
     protected void onStop() {
     	super.onStop();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver0);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver1);
         
-        Log.i(TAG, "on stop, cancelling alarm "+ CHOICE);
+        Log.i(TAG, "on stop, cancel alarm "+ CHOICE);
         //intent = new Intent(MainActivity.this, TransactionUpdateService.class);
         //intent.setData(Uri.parse(CHOICE));
         pendingIntent = PendingIntent.getService(MainActivity.this, REQUEST_CODE, intent, 0);
@@ -306,7 +317,8 @@ public class MainActivity extends Activity {
 			x1[i] = Double.parseDouble(ob.get(i).getPrice());
 			y1[i] = Double.parseDouble(ob.get(i).getAmount());
 		}
-		Log.i(TAG, "nask is "+nbid +"and i is "+i);
+		Log.i(TAG, "nask is "+nask +"and i is "+i);
+		i--;
 		Number[] x2 = new Number[nbid];
 		Number[] y2 = new Number[nbid];
 		for(int j=0; j<nbid; j++){
@@ -329,12 +341,12 @@ public class MainActivity extends Activity {
         // Create a formatter to use for drawing a series using LineAndPointRenderer:
         LineAndPointFormatter format1 = new LineAndPointFormatter(
                 Color.RED,                   // line color
-                Color.RED,        // point color
-                Color.BLUE, null);                // fill color
+                null,        				// point color
+                Color.RED, null);                // fill color
         LineAndPointFormatter format2 = new LineAndPointFormatter(
                 Color.YELLOW,                   // line color
-                Color.YELLOW,           // point color
-                Color.GREEN, null);                	// fill color
+                null,          					 // point color
+                Color.YELLOW, null);                	// fill color
         
         plot1.getGraphWidget().setPaddingRight(2);
         plot1.addSeries(series1, format1);
@@ -342,7 +354,7 @@ public class MainActivity extends Activity {
 
         // customize our domain/range labels
         plot1.setDomainLabel("Price");
-        plot1.setRangeLabel("Value");
+        plot1.setRangeLabel("Amount");
         
         plot1.redraw();
 		plot1.setVisibility(1);

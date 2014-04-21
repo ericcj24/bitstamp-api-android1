@@ -53,10 +53,6 @@ public class OrderBookDatabaseHelper extends SQLiteOpenHelper{
         onUpgrade(db, oldVersion, newVersion);
     }
     
-    public void delete(SQLiteDatabase db){
-    	Log.w(TAG, "delete database");
-    	db.execSQL(DATABASE_DELETE);
-    }
 
     public static OrderBookDatabaseHelper getInstance(Context ctx) {
 
