@@ -76,7 +76,6 @@ public class OrderBookUpdateService extends IntentService{
         		            new Intent(ORDERBOOK_RESULT)
         		            // Puts the status into the Intent
         		            .putParcelableArrayListExtra(ORDERBOOK_RESULT, newOrderBookList);
-        		    localIntent.setData(Uri.parse("orderbook"));
         		    // Broadcasts the Intent to receivers in main UI thread.
         		    //localBroadcaster.sendBroadcast(localIntent);
         		//}
